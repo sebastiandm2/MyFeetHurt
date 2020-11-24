@@ -14,3 +14,6 @@ USER INPUT
   User types in something like trip or random
   User types in random means they want to go somewhere, anywhere. We use bubble sort or merge sort to figure out where. 
 
+11/24/2020
+Chance and Shayne start reading in the data and populate the 2 maps
+Seb starts with mergesort
