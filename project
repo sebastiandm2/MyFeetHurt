@@ -1,20 +1,45 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <unordered_map>
+#include <vector>
+#include <utility>
+#include <set>
 using namespace std;
 
-class AdjList() {
-  unordered_map list<string, vector<pair<int, string> > >;
-  
-  public:
-    
-  
+class AdjacencyList {
+    unordered_map<string, vector<pair <string, int> > > list;
+    set<string> vertices;
+    public:
+    void Insert();
+    void getDestinations(string location);
+    void BuildGraph(); 
+};
+
+void sort(vector<pair<string, int> >& v) {
+    for(int i = v.size()-1; i > 0; i++) {
+        bool swap = false;
+        for(int j = 0; j < i; j++) {
+            if(v[j].second > v[j+1].second) {
+                pair<string, int> t = v[j];//swap
+                v[j] = v[j+1];
+                v[j+1] = t;
+            }
+        }
+        if(!swap) {
+            break;
+        }
+    }
+}
+void AdjacencyList::getDestinations(string location) {
+    vector<pair<string, int> > destinations = list[location];
+    sort(destinations);
+    for(int i = 0; i < destinations.size(); i++) {
+        cout << "Possible Destination: " << destinations[i].first << " Price: $" << destinations[i].second << endl;
+    }
 }
 
 int main() {
-  cout << "Welcome to MyFeetHurt: " << endl << "Enter your current location: " << endl;
-  
-
-
-  return 0;
+    cout << "Welcome to MyFeetHurt: " << endl << "Enter your current location: " << endl;
+    return 0;
 }
