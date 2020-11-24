@@ -1,12 +1,15 @@
 #include <iostream>
 using namespace std;
 
+class AdjList() {
+  unordered_map list<string, vector<pair<int, string> > >;
+  
+}
+
 int main() {
-  cout << "Welcome to MyFeetHurt: " << endl;
+  cout << "Welcome to MyFeetHurt: " << endl << "Enter your current location: " << endl;
+  
 
 
   return 0;
 }
-
-chance the wrapper
-shayne n chiweeeeeee
