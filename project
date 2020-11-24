@@ -1,8 +1,13 @@
 #include <iostream>
+#include <string>
+#include <unordered_map>
 using namespace std;
 
 class AdjList() {
   unordered_map list<string, vector<pair<int, string> > >;
+  
+  public:
+    
   
 }
 
