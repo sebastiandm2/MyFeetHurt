@@ -1,21 +1,65 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
-#include <unordered_map>
 #include <vector>
 #include <utility>
 #include <set>
+#include <fstream>
+#include <sstream>
+
 using namespace std;
 
 class AdjacencyList {
     unordered_map<string, vector<pair <string, int> > > list;
+    unordered_map<string, vector<pair <string, int> > > lyft;
+    unordered_map<string, vector<pair <string, int> > > uber;
     set<string> vertices;
-    
-    public:
-    void Insert();
+
+public:
+    void insertLyft(string from, string to, double price); //populate lyft map
+    void insertUber(string from, string to, double price); //populate uber map
+    void printLyft(); //checking if everything is loaded properly
+    void printUber(); //checking if everything is loaded properly
     void getDestinations(string location);
-    void BuildGraph(); 
+    void BuildGraph();
 };
+
+void AdjacencyList::insertLyft(string from, string to, double price)
+{
+    lyft[from].push_back(make_pair(to, price));
+    lyft[to].push_back(make_pair(from, price));
+}
+
+void AdjacencyList::insertUber(string from, string to, double price)
+{
+    uber[from].push_back(make_pair(to, price));
+    uber[to].push_back(make_pair(from, price));
+}
+
+void AdjacencyList::printLyft()
+{
+    for (auto it : lyft)
+    {
+        for (int i = 0 ; i < lyft[it.first].size(); i++)
+        {
+            cout << it.first << "\n";
+        }
+
+    }
+}
+
+void AdjacencyList::printUber()
+{
+    for (auto it : uber)
+    {
+        for (int i = 0 ; i < uber[it.first].size(); i++)
+        {
+            cout << it.first << "\n";
+        }
+
+    }
+}
+
 void heapify(vector<pair<string, int> >& v, int n, int start)
 {
     int big = start;
@@ -25,11 +69,11 @@ void heapify(vector<pair<string, int> >& v, int n, int start)
     if (left < n && v[left].second > v[big].second) {
         big = left;
     }
- 
+
     if (right < n && v[right].second > v[big].second) {
         big = right;
     }
- 
+
     if (big != start) {
         swap(v[start], v[big]);
         heapify(v, n, big);
@@ -71,8 +115,54 @@ void AdjacencyList::getDestinations(string location) {
     }
 }
 
-int main() {
-    cout << "Welcome to MyFeetHurt: " << endl << "Enter your current location: " << endl;
-    
+int main()
+{
+    string start, end;
+    cout << "Please enter your current location.\n";
+    getline(cin, start);
+    cout << "Please enter your destination. Type 'random' if you would like us to choose.\n";
+    getline(cin, end);
+    ifstream file("data.txt");
+
+    if (!file.is_open()) {
+        cout << "file could not be opened";
+    }
+
+    if (file)
+    {
+        string type, from, to, line, extra, p;
+        double price;
+        AdjacencyList graph;
+
+        while (getline(file, line))
+        {
+            stringstream linestream(line);
+
+            getline(linestream, extra, ',');
+            getline(linestream, type, ',');
+            getline(linestream, extra, ',');
+            getline(linestream, to, ',');
+            getline(linestream, from, ',');
+            getline(linestream, p, ',');
+            getline(linestream, extra, ',');
+            getline(linestream, extra, ',');
+            getline(linestream, extra, ',');
+            getline(linestream, extra, ',');
+
+            price = stod(p);
+
+            cout << type << "\n";//trynna see if this file thing is working
+            //haha its not, ill come back tmrw
+            if (type == "Lyft")
+                graph.insertLyft(from, to, price);
+
+            else
+                graph.insertUber(from, to, price);
+
+        }
+    }
+
+    file.close();
+
     return 0;
 }
