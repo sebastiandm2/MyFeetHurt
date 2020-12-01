@@ -36,25 +36,25 @@ void AdjacencyList::insertUber(string from, string to, double price)
     uber[to].push_back(make_pair(from, price));
 }
 
-void AdjacencyList::printLyft()
+void AdjacencyList::printLyft() //checking if the maps were made properly
 {
     for (auto it : lyft)
     {
-        for (int i = 0 ; i < lyft[it.first].size(); i++)
+        for (auto ve : it.second)
         {
-            cout << it.first << "\n";
+            cout << it.first << "," << ve.first << "," << ve.second << "\n";
         }
 
     }
 }
 
-void AdjacencyList::printUber()
+void AdjacencyList::printUber() //checking if the maps were made properly
 {
     for (auto it : uber)
     {
-        for (int i = 0 ; i < uber[it.first].size(); i++)
+        for (auto ve : it.second)
         {
-            cout << it.first << "\n";
+            cout << it.first << "," << ve.first << "," << ve.second << "\n";
         }
 
     }
@@ -118,6 +118,7 @@ void AdjacencyList::getDestinations(string location) {
 int main()
 {
     string start, end;
+    AdjacencyList graph;
     cout << "Please enter your current location.\n";
     getline(cin, start);
     cout << "Please enter your destination. Type 'random' if you would like us to choose.\n";
@@ -132,7 +133,6 @@ int main()
     {
         string type, from, to, line, extra, p;
         double price;
-        AdjacencyList graph;
 
         while (getline(file, line))
         {
@@ -149,10 +149,13 @@ int main()
             getline(linestream, extra, ',');
             getline(linestream, extra, ',');
 
+            if (p == "") //there's some that have the price field blank
+                p = "0";
+
+            //cout << type << " " << p << "\n";
+
             price = stod(p);
 
-            cout << type << "\n";//trynna see if this file thing is working
-            //haha its not, ill come back tmrw
             if (type == "Lyft")
                 graph.insertLyft(from, to, price);
 
@@ -163,6 +166,8 @@ int main()
     }
 
     file.close();
+    graph.printLyft();
+    graph.printUber();
 
     return 0;
 }
