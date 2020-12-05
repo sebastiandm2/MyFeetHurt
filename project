@@ -117,12 +117,9 @@ void AdjacencyList::getDestinations(string location) {
 
 int main()
 {
-    string start, end;
+    //READ IN FILE DATA AND POPULATE MAPS
+    
     AdjacencyList graph;
-    cout << "Please enter your current location.\n";
-    getline(cin, start);
-    cout << "Please enter your destination. Type 'random' if you would like us to choose.\n";
-    getline(cin, end);
     ifstream file("data.txt");
 
     if (!file.is_open()) {
@@ -166,8 +163,22 @@ int main()
     }
 
     file.close();
-    graph.printLyft();
-    graph.printUber();
-
+    graph.printLyft(); //for debugging purposes
+    graph.printUber(); //for debugging purposes
+    
+   
+    // INTERACT WITH USER
+    string location;
+    cout<< "Hi! Do your feet hurt? Are you bored and want to go somewhere? anywhere? Perfect! Enter your location to start <3 : \n";
+    getline(cin, location);
+    
+    //sorting algorithms and comparsion
+    //look for location (key) in uber map and lyft map
+    //pass vector (value) to our sorting methods and return sorted vectors
+        //here we will compare the time taken to perform our 2 sorting algorithms 
+    //output to screen the sorted vectors and choose the minimum of each as a recommendation
+    
+    
+    //EXIT GRACEFULLY
     return 0;
 }
