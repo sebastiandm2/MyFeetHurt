@@ -7,30 +7,46 @@
 #include <fstream>
 #include <sstream>
 
+//TODO::: we need something to average the costs. Like north station to haymarket square is there 7 times all
+//for 7$. it should only be in the map one time. fix
+//TODO::: we need to calculate time of bubble sort and heap sort and print it out
+//TODO::: we need a catch when the location they enter dne
+//TODO:::everything is printing out as mostly whole numbers like 13 or 6.5 my debugger wont work someone help
+
 using namespace std;
 
 class AdjacencyList {
-    unordered_map<string, vector<pair <string, int> > > list;
-    unordered_map<string, vector<pair <string, int> > > lyft;
-    unordered_map<string, vector<pair <string, int> > > uber;
+    unordered_map<string, vector<pair <string, float> > > list;
+    unordered_map<string, vector<pair <string, float> > > lyft;
+    unordered_map<string, vector<pair <string, float> > > uber;
     set<string> vertices;
 
 public:
-    void insertLyft(string from, string to, double price); //populate lyft map
-    void insertUber(string from, string to, double price); //populate uber map
+    //read in data & populate maps
+    void insertLyft(string from, string to, float price); //populate lyft map
+    void insertUber(string from, string to, float price); //populate uber map
     void printLyft(); //checking if everything is loaded properly
     void printUber(); //checking if everything is loaded properly
-    void getDestinations(string location);
-    void BuildGraph();
+    ////void getDestinations(string location); //old will delete later
+    ////void BuildGraph(); //is this garbage
+    //our sorting methods
+    void heapSort(vector<pair<string, float> >& v);
+    void heapify(vector<pair<string, float> >& v, int n, int start);
+    void buildHeap(vector<pair<string, float> >& v, int size);
+    void superSort(vector<pair<string, float> >& v);
+    vector<pair<string, float>> bubbleSort(vector<pair<string, float>>& v);
+    //calling our sorting methods
+    void getDestinationsHeap(string location);
+    void getDestinationsBubble(string location);
 };
 
-void AdjacencyList::insertLyft(string from, string to, double price)
+void AdjacencyList::insertLyft(string from, string to, float price) //populate map
 {
     lyft[from].push_back(make_pair(to, price));
     lyft[to].push_back(make_pair(from, price));
 }
 
-void AdjacencyList::insertUber(string from, string to, double price)
+void AdjacencyList::insertUber(string from, string to, float price) //populate map
 {
     uber[from].push_back(make_pair(to, price));
     uber[to].push_back(make_pair(from, price));
@@ -44,7 +60,6 @@ void AdjacencyList::printLyft() //checking if the maps were made properly
         {
             cout << it.first << "," << ve.first << "," << ve.second << "\n";
         }
-
     }
 }
 
@@ -56,11 +71,11 @@ void AdjacencyList::printUber() //checking if the maps were made properly
         {
             cout << it.first << "," << ve.first << "," << ve.second << "\n";
         }
-
     }
 }
 
-void heapify(vector<pair<string, int> >& v, int n, int start)
+//algorithm 1 = heap sort: heapify, buildHeap, heapSort, superSort --> logarithmic sort
+void AdjacencyList::heapify(vector<pair<string, float> >& v, int n, int start)
 {
     int big = start;
     int left = 2*start + 1;
@@ -79,12 +94,12 @@ void heapify(vector<pair<string, int> >& v, int n, int start)
         heapify(v, n, big);
     }
 }
-void buildHeap(vector<pair<string, int> >& v, int size) {
+void AdjacencyList::buildHeap(vector<pair<string, float> >& v, int size) {
     for (int i = size / 2 - 1; i >= 0; i--) {
         heapify(v, size, i);
     }
 }
-void heapSort(vector<pair<string, int> >& v)
+void AdjacencyList::heapSort(vector<pair<string, float> >& v)
 {
     int size = v.size();
     buildHeap(v, size);
@@ -93,7 +108,7 @@ void heapSort(vector<pair<string, int> >& v)
         heapify(v, i, 0);
     }
 }
-void superSort(vector<pair<string, int> >& v) {
+void AdjacencyList::superSort(vector<pair<string, float> >& v) {
     bool sorted = true;
     for(int i = 0; i < v.size()-1; i++) {
         if(v[i] > v[i+1]) {
@@ -104,9 +119,29 @@ void superSort(vector<pair<string, int> >& v) {
         cout << "sorted!" << endl;
         return;
     }
-
     heapSort(v);
 }
+
+//algorithm 2 = bubble sort --> quadratic sort
+vector<pair<string, float>> AdjacencyList:: bubbleSort(vector<pair<string, float>>& v) {
+    for(int i = v.size()-1; i > 0; i++) {
+        bool swap = false;
+        for(int j = 0; j < i; j++) {
+            if(v[j].second > v[j+1].second) {
+                pair<string, int> t = v[j];//swap
+                v[j] = v[j+1];
+                v[j+1] = t;
+            }
+        }
+        if(!swap) //if there's no swap, vector is already sorted -> exit. Best case.
+            return v;
+    }
+    return v;
+}
+/*
+ * Seb's code used 1 list. Chance implemented with 2 lists (uber and lyft). So im using this code but
+ * calling it on the uber and lyft maps. And doing this twice for our 2 sorting algorithms.
+ *
 void AdjacencyList::getDestinations(string location) {
     vector<pair<string, int> > destinations = list[location];
     superSort(destinations);
@@ -114,22 +149,91 @@ void AdjacencyList::getDestinations(string location) {
         cout << "Possible Destination: " << destinations[i].first << " Price: $" << destinations[i].second << endl;
     }
 }
+*/
+//call these on the uber and lyft maps. Print out sorted vector.
+void AdjacencyList::getDestinationsHeap(string location)
+{
+    float uberMin=0;
+    float lyftMin=0;
+    float min=0;
+    string type="";
+    string destination="";
+    //first do uber
+    vector<pair<string, float> > destinationsUber = uber[location];
+    superSort(destinationsUber);
+    cout << "These are all the places you can go with an uber!\n";
+    uberMin=destinationsUber[0].second; //get the price
+    for(int i = 0; i < destinationsUber.size(); i++) {
+        cout << "Possible Destination: " << destinationsUber[i].first;
+        cout << " Price: $" << std::setprecision(2)<< destinationsUber[i].second << endl;
+    }
+
+    //second do lyft
+    vector<pair<string, float> > destinationsLyft = lyft[location];
+    superSort(destinationsLyft);
+    cout << "These are all the places you can go with a lyft!\n";
+    lyftMin=destinationsLyft[0].second; //get the price
+    for(int i = 0; i < destinationsLyft.size(); i++) {
+        cout << "Possible Destination: " << destinationsLyft[i].first;
+        cout << " Price: $" << std::setprecision(2)<< destinationsLyft[i].second << endl;
+    }
+
+    //print minimum of uber price and lyft price
+    if (uberMin<lyftMin) {
+        destination = destinationsUber[0].first;
+        min = uberMin;
+        type="an Uber";
+    }
+    else {
+        destination = destinationsLyft[0].first;
+        min = lyftMin;
+        type="a Lyft";
+    }
+
+    cout << "\nBased on the price comparison between Uber and Lyft, we recommend you take " << type;
+    cout << " to " << destination;
+    cout << " for " << min << " dollars. Have fun!!!\n";
+
+}
+void AdjacencyList::getDestinationsBubble(string location)
+{
+    double uberMin=0;
+    double lyftMin=0;
+
+    //first do uber
+    vector<pair<string, float> > destinationsUber = uber[location];
+    bubbleSort(destinationsUber);
+    cout << "These are all the places you can go with an uber!\n";
+    for(int i = 0; i < destinationsUber.size(); i++) {
+        cout << "Possible Destination: " << destinationsUber[i].first;
+        cout << " Price: $" << std::setprecision(2)<< destinationsUber[i].second << endl;
+    }
+
+    //second do lyft
+    vector<pair<string, float> > destinationsLyft = lyft[location];
+    bubbleSort(destinationsLyft);
+    cout << "These are all the places you can go with a lyft!\n";
+    for(int i = 0; i < destinationsLyft.size(); i++) {
+        cout << "Possible Destination: " << destinationsLyft[i].first;
+        cout << " Price: $" << std::setprecision(2)<< destinationsLyft[i].second << endl;
+    }
+}
 
 int main()
 {
     //READ IN FILE DATA AND POPULATE MAPS
-    
+
     AdjacencyList graph;
     ifstream file("data.txt");
 
     if (!file.is_open()) {
-        cout << "file could not be opened";
+        cout << "file could not be opened\n";
     }
 
     if (file)
     {
         string type, from, to, line, extra, p;
-        double price;
+        float price;
 
         while (getline(file, line))
         {
@@ -147,7 +251,9 @@ int main()
             getline(linestream, extra, ',');
 
             if (p == "") //there's some that have the price field blank
-                p = "0";
+                continue; //@ CHANCE REVIEW. IF THE PRICE IS 0 IT FUCKS W OUR COMPARISONS SO I JUST THINK
+                          //WE SHOULDNT ADD TO MAP. DOES CONTINUE BRING BACK TO WHILE LOOP?
+                //p = "0";
 
             //cout << type << " " << p << "\n";
 
@@ -163,22 +269,19 @@ int main()
     }
 
     file.close();
-    graph.printLyft(); //for debugging purposes
-    graph.printUber(); //for debugging purposes
-    
-   
+    //graph.printLyft(); //for debugging purposes
+    //graph.printUber(); //for debugging purposes
+
     // INTERACT WITH USER
     string location;
-    cout<< "Hi! Do your feet hurt? Are you bored and want to go somewhere? anywhere? Perfect! Enter your location to start <3 : \n";
+    cout<< "Hi! Do your feet hurt?\nAre you bored and want to go somewhere? anywhere? \nPerfect! Enter your location to start: ";
     getline(cin, location);
+
+    //here we will compare the time taken to perform our 2 sorting algorithms
     
-    //sorting algorithms and comparsion
-    //look for location (key) in uber map and lyft map
-    //pass vector (value) to our sorting methods and return sorted vectors
-        //here we will compare the time taken to perform our 2 sorting algorithms 
     //output to screen the sorted vectors and choose the minimum of each as a recommendation
-    
-    
+    graph.getDestinationsHeap(location);
+
     //EXIT GRACEFULLY
     return 0;
 }
