@@ -6,6 +6,7 @@
 #include <set>
 #include <fstream>
 #include <sstream>
+#include <chrono>
 
 //TODO::: we need to calculate time of bubble sort and heap sort and print it out -->chance
 //TODO::: once we get the time just cout a few sentences to screen in main
@@ -196,15 +197,31 @@ void AdjacencyList::getDestinations(string location,string sort)
     float uberMin=0;
     float lyftMin=0;
     float min=0;
+    auto uberStart = chrono::high_resolution_clock::now();
+    auto uberStop = chrono::high_resolution_clock::now();
+    auto uberTime = chrono::duration_cast<chrono::nanoseconds>(uberStop-uberStart).count();
+    auto lyftStart = chrono::high_resolution_clock::now();
+    auto lyftStop = chrono::high_resolution_clock::now();
+    auto lyftTime = chrono::duration_cast<chrono::nanoseconds>(lyftStop-lyftStart).count();
     string type="";
     string destination="";
 
     //first do uber
     vector<pair<string, float> > destinationsUber = uber[location];
     if (sort=="heap")
+    {
+        auto uberStart = chrono::high_resolution_clock::now();
         superSort(destinationsUber);
+        auto uberStop = chrono::high_resolution_clock::now();
+        auto uberTime = chrono::duration_cast<chrono::nanoseconds>(uberStop-uberStart).count();
+    }
     if (sort == "bubble")
+    {
+        auto uberStart = chrono::high_resolution_clock::now();
         bubbleSort(destinationsUber);
+        auto uberStop = chrono::high_resolution_clock::now();
+        auto uberTime = chrono::duration_cast<chrono::nanoseconds>(uberStop-uberStart).count();
+    }
     cout << "\nThese are all the places you can go with an Uber!\n";
     uberMin=destinationsUber[0].second; //get the min price
     for(int i = 0; i < destinationsUber.size(); i++) {
@@ -215,9 +232,21 @@ void AdjacencyList::getDestinations(string location,string sort)
     //second do lyft
     vector<pair<string, float> > destinationsLyft = lyft[location];
     if (sort=="heap")
+    {
+        auto lyftStart = chrono::high_resolution_clock::now();
         superSort(destinationsLyft);
+        auto lyftStop = chrono::high_resolution_clock::now();
+        auto lyftTime = chrono::duration_cast<chrono::nanoseconds>(lyftStop-lyftStart).count();
+
+    }
     if (sort == "bubble")
+    {
+        auto lyftStart = chrono::high_resolution_clock::now();
         bubbleSort(destinationsLyft);
+        auto lyftStop = chrono::high_resolution_clock::now();
+        auto lyftTime = chrono::duration_cast<chrono::nanoseconds>(lyftStop-lyftStart).count();
+        cout << "\nTime taken on " << sort << " sort for Uber: " << time << " nanoseconds.\n";
+    }
     cout << "\nThese are all the places you can go with a Lyft!\n";
     lyftMin=destinationsLyft[0].second; //get the min price
     for(int i = 0; i < destinationsLyft.size(); i++) {
@@ -238,7 +267,10 @@ void AdjacencyList::getDestinations(string location,string sort)
     }
     cout << "\nBased on the price comparison between Uber and Lyft, we recommend you take " << type;
     cout << " to " << destination;
-    cout << " for about " << min << "$. Have fun!!! Be safe!!\n";
+    cout << " for about $" << min << ". Have fun!!! Be safe!!\n";
+
+    cout << "\nTime taken on " << sort << " sort for Uber: " << uberTime << " nanoseconds.\n";
+    cout << "Time taken on " << sort << " sort for Lyft: " << lyftTime << " nanoseconds.\n";
 
 }//end heap destinations
 
@@ -274,7 +306,7 @@ int main()
 
             if (p == "") //there's some that have the price field blank
                 continue; //@ CHANCE REVIEW. IF THE PRICE IS 0 IT FUCKS W OUR COMPARISONS SO I JUST THINK
-                          //WE SHOULDNT ADD TO MAP. DOES CONTINUE BRING BACK TO WHILE LOOP?
+            //WE SHOULDNT ADD TO MAP. DOES CONTINUE BRING BACK TO WHILE LOOP?
             price = stof(p);
 
             if (type == "Lyft")
@@ -313,10 +345,7 @@ int main()
 
     //output to screen the sorted vectors and choose the minimum of each as a recommendation
     graph.getDestinations(location,sort);
-
-    //here we will compare the time taken to perform our 2 sorting algorithms
-    //chance this is all u babyyyyyy
-
+    
     //EXIT GRACEFULLY
     return 0;
 }
