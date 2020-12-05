@@ -256,15 +256,15 @@ void AdjacencyList::getTime(string location)
 
     //time for heap sort, Uber
     auto superStart = chrono::high_resolution_clock::now();
-    auto superStop = chrono::high_resolution_clock::now();
     superSort(destinationsUber);
     superSort(destinationsLyft);
+    auto superStop = chrono::high_resolution_clock::now();
     auto superTime = chrono::duration_cast<chrono::nanoseconds>(superStop-superStart).count();
 
     auto bubbleStart = chrono::high_resolution_clock::now();
-    auto bubbleStop = chrono::high_resolution_clock::now();
     bubbleSort(destinationsUber);
     bubbleSort(destinationsLyft);
+    auto bubbleStop = chrono::high_resolution_clock::now();
     auto bubbleTime = chrono::duration_cast<chrono::nanoseconds>(bubbleStop-bubbleStart).count();
 
     cout << "\nTime taken for heap sort: " << superTime << " nanoseconds\n";
