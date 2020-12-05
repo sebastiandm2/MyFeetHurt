@@ -39,6 +39,8 @@ public:
     void getDestinations(string location, string sort);
     bool locationCheck(string location);
     void printLocations();
+
+    void getTime(string location);
 };
 
 bool AdjacencyList::averagePrice(string to, string from, int price, string type) {
@@ -197,31 +199,17 @@ void AdjacencyList::getDestinations(string location,string sort)
     float uberMin=0;
     float lyftMin=0;
     float min=0;
-    auto uberStart = chrono::high_resolution_clock::now();
-    auto uberStop = chrono::high_resolution_clock::now();
-    auto uberTime = chrono::duration_cast<chrono::nanoseconds>(uberStop-uberStart).count();
-    auto lyftStart = chrono::high_resolution_clock::now();
-    auto lyftStop = chrono::high_resolution_clock::now();
-    auto lyftTime = chrono::duration_cast<chrono::nanoseconds>(lyftStop-lyftStart).count();
     string type="";
     string destination="";
 
     //first do uber
     vector<pair<string, float> > destinationsUber = uber[location];
     if (sort=="heap")
-    {
-        auto uberStart = chrono::high_resolution_clock::now();
         superSort(destinationsUber);
-        auto uberStop = chrono::high_resolution_clock::now();
-        auto uberTime = chrono::duration_cast<chrono::nanoseconds>(uberStop-uberStart).count();
-    }
+
     if (sort == "bubble")
-    {
-        auto uberStart = chrono::high_resolution_clock::now();
         bubbleSort(destinationsUber);
-        auto uberStop = chrono::high_resolution_clock::now();
-        auto uberTime = chrono::duration_cast<chrono::nanoseconds>(uberStop-uberStart).count();
-    }
+
     cout << "\nThese are all the places you can go with an Uber!\n";
     uberMin=destinationsUber[0].second; //get the min price
     for(int i = 0; i < destinationsUber.size(); i++) {
@@ -232,21 +220,11 @@ void AdjacencyList::getDestinations(string location,string sort)
     //second do lyft
     vector<pair<string, float> > destinationsLyft = lyft[location];
     if (sort=="heap")
-    {
-        auto lyftStart = chrono::high_resolution_clock::now();
         superSort(destinationsLyft);
-        auto lyftStop = chrono::high_resolution_clock::now();
-        auto lyftTime = chrono::duration_cast<chrono::nanoseconds>(lyftStop-lyftStart).count();
 
-    }
     if (sort == "bubble")
-    {
-        auto lyftStart = chrono::high_resolution_clock::now();
         bubbleSort(destinationsLyft);
-        auto lyftStop = chrono::high_resolution_clock::now();
-        auto lyftTime = chrono::duration_cast<chrono::nanoseconds>(lyftStop-lyftStart).count();
-        cout << "\nTime taken on " << sort << " sort for Uber: " << time << " nanoseconds.\n";
-    }
+
     cout << "\nThese are all the places you can go with a Lyft!\n";
     lyftMin=destinationsLyft[0].second; //get the min price
     for(int i = 0; i < destinationsLyft.size(); i++) {
@@ -268,11 +246,30 @@ void AdjacencyList::getDestinations(string location,string sort)
     cout << "\nBased on the price comparison between Uber and Lyft, we recommend you take " << type;
     cout << " to " << destination;
     cout << " for about $" << min << ". Have fun!!! Be safe!!\n";
-
-    cout << "\nTime taken on " << sort << " sort for Uber: " << uberTime << " nanoseconds.\n";
-    cout << "Time taken on " << sort << " sort for Lyft: " << lyftTime << " nanoseconds.\n";
-
 }//end heap destinations
+
+void AdjacencyList::getTime(string location)
+{
+    //comparing times of heap sort vs bubble sort
+    vector<pair<string, float> > destinationsUber = uber[location];
+    vector<pair<string, float> > destinationsLyft = lyft[location];
+
+    //time for heap sort, Uber
+    auto superStart = chrono::high_resolution_clock::now();
+    auto superStop = chrono::high_resolution_clock::now();
+    superSort(destinationsUber);
+    superSort(destinationsLyft);
+    auto superTime = chrono::duration_cast<chrono::nanoseconds>(superStop-superStart).count();
+
+    auto bubbleStart = chrono::high_resolution_clock::now();
+    auto bubbleStop = chrono::high_resolution_clock::now();
+    bubbleSort(destinationsUber);
+    bubbleSort(destinationsLyft);
+    auto bubbleTime = chrono::duration_cast<chrono::nanoseconds>(bubbleStop-bubbleStart).count();
+
+    cout << "\nTime taken for heap sort: " << superTime << " nanoseconds\n";
+    cout << "Time taken for bubble sort: " << bubbleTime << " nanoseconds\n";
+}
 
 int main()
 {
@@ -345,7 +342,10 @@ int main()
 
     //output to screen the sorted vectors and choose the minimum of each as a recommendation
     graph.getDestinations(location,sort);
-    
+
+    //output times for heap and bubble sort
+    graph.getTime(location);
+
     //EXIT GRACEFULLY
     return 0;
 }
