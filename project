@@ -7,11 +7,9 @@
 #include <fstream>
 #include <sstream>
 
-//TODO::: we need something to average the costs. Like north station to haymarket square is there 7 times all
-//for 7$. it should only be in the map one time. fix --> seb
 //TODO::: we need to calculate time of bubble sort and heap sort and print it out -->chance
-//TODO::: we need a catch when the location they enter dne --> just gonna display the options and if its not in it catch
-//TODO:::everything is printing out as mostly whole numbers like 13 or 6.5 my debugger wont work someone help --> not important for now
+//TODO::: once we get the time just cout a few sentences to screen in main
+//TODO::: @ seb when we average the prices, heap and bubble give same answer soooo....
 
 using namespace std;
 
@@ -27,6 +25,7 @@ public:
     void insertUber(string from, string to, float price); //populate uber map
     void printLyft(); //checking if everything is loaded properly
     void printUber(); //checking if everything is loaded properly
+    bool averagePrice(string to, string from, int price, string type);
 
     //our sorting methods
     void heapSort(vector<pair<string, float> >& v);
@@ -37,18 +36,52 @@ public:
 
     //calling our sorting methods
     void getDestinations(string location, string sort);
+    bool locationCheck(string location);
+    void printLocations();
 };
+
+bool AdjacencyList::averagePrice(string to, string from, int price, string type) {
+    //if the location is already there average the price, otherwise return false
+    vector<pair <string, float>> val;
+    bool dne=true;
+    if (type == "uber")
+        val=uber[from];
+    if (type == "lyft")
+        val=lyft[from];
+
+    for (int i=0; i< val.size(); i++)
+    {
+        if (val[i].first == to) //if its already in there
+        {
+            val[i].second = ((val[i].second) / 2.0) + ((price) / 2.0);
+            dne = false;
+        }
+    }
+    return dne;
+}
 
 void AdjacencyList::insertLyft(string from, string to, float price) //populate map
 {
-    lyft[from].push_back(make_pair(to, price));
-    lyft[to].push_back(make_pair(from, price));
+    if (averagePrice(to,from,price,"lyft")) //this function returns true if its not in the map
+    {
+        lyft[from].push_back(make_pair(to, price));
+        lyft[to].push_back(make_pair(from, price));
+    }
+    //lyft[from].push_back(make_pair(to, price));
+    //lyft[to].push_back(make_pair(from, price));
+    //list[from].push_back(make_pair(to, price));
 }
 
 void AdjacencyList::insertUber(string from, string to, float price) //populate map
 {
-    uber[from].push_back(make_pair(to, price));
-    uber[to].push_back(make_pair(from, price));
+    if (averagePrice(to,from,price,"uber")) //this function returns true if its not in the map
+    {
+        uber[from].push_back(make_pair(to, price));
+        uber[to].push_back(make_pair(from, price));
+    }
+    //uber[from].push_back(make_pair(to, price));
+    //uber[to].push_back(make_pair(from, price));
+    //list[from].push_back(make_pair(to, price));
 }
 
 void AdjacencyList::printLyft() //checking if the maps were made properly
@@ -67,6 +100,29 @@ void AdjacencyList::printUber() //checking if the maps were made properly
         for (auto ve : it.second)
             cout << it.first << "," << ve.first << "," << ve.second << "\n";
     }
+}
+
+void AdjacencyList::printLocations()
+{
+    for (auto it : list)
+        cout << it.first << ", ";
+    cout << "\n";
+}
+//check if location exists to prevent exit11
+bool AdjacencyList::locationCheck(string location) {
+    bool found=false;
+    for (auto it : lyft) //checking lyft locations for user input
+    {
+        if(it.first == location )
+            found=true;
+    }
+
+    for (auto it : uber) //checking uber locations for user input
+    {
+        if(it.first == location )
+            found=true;
+    }
+    return found;
 }
 
 //algorithm 1 = heap sort: heapify, buildHeap, heapSort, superSort --> logarithmic sort
@@ -153,7 +209,7 @@ void AdjacencyList::getDestinations(string location,string sort)
     uberMin=destinationsUber[0].second; //get the min price
     for(int i = 0; i < destinationsUber.size(); i++) {
         cout << "Possible Destination: " << destinationsUber[i].first;
-        cout << " Price: $" << std::setprecision(2)<< destinationsUber[i].second << endl;
+        cout << ", Price: $" << std::setprecision(2)<< destinationsUber[i].second << endl;
     }
 
     //second do lyft
@@ -166,7 +222,7 @@ void AdjacencyList::getDestinations(string location,string sort)
     lyftMin=destinationsLyft[0].second; //get the min price
     for(int i = 0; i < destinationsLyft.size(); i++) {
         cout << "Possible Destination: " << destinationsLyft[i].first;
-        cout << " Price: $" << std::setprecision(2)<< destinationsLyft[i].second << endl;
+        cout << ", Price: $" << std::setprecision(2)<< destinationsLyft[i].second << endl;
     }
 
     //print minimum of uber price and lyft price
@@ -182,7 +238,8 @@ void AdjacencyList::getDestinations(string location,string sort)
     }
     cout << "\nBased on the price comparison between Uber and Lyft, we recommend you take " << type;
     cout << " to " << destination;
-    cout << " for " << min << " dollars. Have fun!!! Be safe!!\n";
+    cout << " for about " << min << "$. Have fun!!! Be safe!!\n";
+
 }//end heap destinations
 
 int main()
@@ -232,21 +289,34 @@ int main()
     //graph.printLyft(); //for debugging purposes
     //graph.printUber(); //for debugging purposes
 
-    // INTERACT WITH USER
+    //INTERACT WITH USER
     string location;
-    cout<< "Hi! Do your feet hurt?\nAre you bored and want to go somewhere? anywhere? \nPerfect! Enter yur location to start: ";
+    cout<< "Hi! Do your feet hurt?\nAre you bored and want to go somewhere? anywhere? \nPerfect! Enter your location to start: ";
     getline(cin, location);
+
+    //Check if location is in our database. If it's not, ask again. Give a list of locations if they want.
+    while(!(graph.locationCheck(location)))//if locationCheck returns false the user input is invalid
+    {
+        cout << "Oh no! Did you make a typo? We don't have that location in our database! Maybe try entering a place nearby :)\n";
+        cout << "\nWould you like to see a list of places in Boston? (yes/no): ";
+        string yn;
+        getline(cin,yn);
+        if (yn == "yes") //print out list of locations in database
+            graph.printLocations();
+        cout << "\nTry entering a new place: ";
+        getline(cin,location);
+    }
 
     string sort;
     cout<< "Would you like to do a heap sort or a bubble sort? (heap/bubble): ";
     getline(cin, sort);
 
     //output to screen the sorted vectors and choose the minimum of each as a recommendation
-    graph.getDestinations(location, sort);
+    graph.getDestinations(location,sort);
 
     //here we will compare the time taken to perform our 2 sorting algorithms
     //chance this is all u babyyyyyy
-    
+
     //EXIT GRACEFULLY
     return 0;
 }
