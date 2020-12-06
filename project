@@ -1,3 +1,4 @@
+//MyFeetHurt by Shayne Pollock, Chance Onyiorah, Sebastian Martinez. Go somewhere random in Boston!
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -6,11 +7,6 @@
 #include <set>
 #include <fstream>
 #include <sstream>
-#include <chrono>
-
-//TODO::: we need to calculate time of bubble sort and heap sort and print it out -->chance
-//TODO::: once we get the time just cout a few sentences to screen in main
-//TODO::: @ seb when we average the prices, heap and bubble give same answer soooo....
 
 using namespace std;
 
@@ -27,26 +23,24 @@ public:
     void printLyft(); //checking if everything is loaded properly
     void printUber(); //checking if everything is loaded properly
     bool averagePrice(string to, string from, int price, string type);
-    void seeAllDestinations();
 
     //our sorting methods
     void heapSort(vector<pair<string, float> >& v);
     void heapify(vector<pair<string, float> >& v, int n, int start);
     void buildHeap(vector<pair<string, float> >& v, int size);
     void superSort(vector<pair<string, float> >& v);
-    vector<pair<string, float> > bubbleSort(vector<pair<string, float> >& v);
+    vector<pair<string, float>> bubbleSort(vector<pair<string, float>>& v);
 
-    //calling our sorting methods
+    //miscellaneous
     void getDestinations(string location, string sort);
     bool locationCheck(string location);
     void printLocations();
-
     void getTime(string location);
 };
 
 bool AdjacencyList::averagePrice(string to, string from, int price, string type) {
     //if the location is already there average the price, otherwise return false
-    vector<pair <string, float> > val;
+    vector<pair <string, float>> val;
     bool dne=true;
     if (type == "uber")
         val=uber[from];
@@ -70,12 +64,8 @@ void AdjacencyList::insertLyft(string from, string to, float price) //populate m
     {
         lyft[from].push_back(make_pair(to, price));
         lyft[to].push_back(make_pair(from, price));
-        vertices.insert(from);
-        vertices.insert(to);
     }
-    //lyft[from].push_back(make_pair(to, price));
-    //lyft[to].push_back(make_pair(from, price));
-    //list[from].push_back(make_pair(to, price));
+    list[from].push_back(make_pair(to, price));
 }
 
 void AdjacencyList::insertUber(string from, string to, float price) //populate map
@@ -84,12 +74,8 @@ void AdjacencyList::insertUber(string from, string to, float price) //populate m
     {
         uber[from].push_back(make_pair(to, price));
         uber[to].push_back(make_pair(from, price));
-        vertices.insert(from);
-        vertices.insert(to);
     }
-    //uber[from].push_back(make_pair(to, price));
-    //uber[to].push_back(make_pair(from, price));
-    //list[from].push_back(make_pair(to, price));
+    list[from].push_back(make_pair(to, price));
 }
 
 void AdjacencyList::printLyft() //checking if the maps were made properly
@@ -113,8 +99,7 @@ void AdjacencyList::printUber() //checking if the maps were made properly
 void AdjacencyList::printLocations()
 {
     for (auto it : list)
-        cout << it.first << ", ";
-    cout << "\n";
+        cout << it.first << "\n";
 }
 //check if location exists to prevent exit11
 bool AdjacencyList::locationCheck(string location) {
@@ -131,6 +116,29 @@ bool AdjacencyList::locationCheck(string location) {
             found=true;
     }
     return found;
+}
+
+void AdjacencyList::getTime(string location)
+{
+    //comparing times of heap sort vs bubble sort
+    vector<pair<string, float> > destinationsUber = uber[location];
+    vector<pair<string, float> > destinationsLyft = lyft[location];
+
+    //time for heap sort, Uber
+    auto superStart = chrono::high_resolution_clock::now();
+    superSort(destinationsUber);
+    superSort(destinationsLyft);
+    auto superStop = chrono::high_resolution_clock::now();
+    auto superTime = chrono::duration_cast<chrono::nanoseconds>(superStop-superStart).count();
+
+    auto bubbleStart = chrono::high_resolution_clock::now();
+    bubbleSort(destinationsUber);
+    bubbleSort(destinationsLyft);
+    auto bubbleStop = chrono::high_resolution_clock::now();
+    auto bubbleTime = chrono::duration_cast<chrono::nanoseconds>(bubbleStop-bubbleStart).count();
+
+    cout << "\nTime taken for heap sort: " << superTime << " nanoseconds\n";
+    cout << "Time taken for bubble sort: " << bubbleTime << " nanoseconds\n";
 }
 
 //algorithm 1 = heap sort: heapify, buildHeap, heapSort, superSort --> logarithmic sort
@@ -182,7 +190,7 @@ void AdjacencyList::superSort(vector<pair<string, float> >& v) {
 }
 
 //algorithm 2 = bubble sort --> quadratic sort
-vector<pair<string, float> > AdjacencyList:: bubbleSort(vector<pair<string, float> >& v) {
+vector<pair<string, float>> AdjacencyList:: bubbleSort(vector<pair<string, float>>& v) {
     for(int i = v.size()-1; i > 0; i++) {
         bool swap = false;
         for(int j = 0; j < i; j++) {
@@ -211,10 +219,8 @@ void AdjacencyList::getDestinations(string location,string sort)
     vector<pair<string, float> > destinationsUber = uber[location];
     if (sort=="heap")
         superSort(destinationsUber);
-
     if (sort == "bubble")
         bubbleSort(destinationsUber);
-
     cout << "\nThese are all the places you can go with an Uber!\n";
     uberMin=destinationsUber[0].second; //get the min price
     for(int i = 0; i < destinationsUber.size(); i++) {
@@ -226,10 +232,8 @@ void AdjacencyList::getDestinations(string location,string sort)
     vector<pair<string, float> > destinationsLyft = lyft[location];
     if (sort=="heap")
         superSort(destinationsLyft);
-
     if (sort == "bubble")
         bubbleSort(destinationsLyft);
-
     cout << "\nThese are all the places you can go with a Lyft!\n";
     lyftMin=destinationsLyft[0].second; //get the min price
     for(int i = 0; i < destinationsLyft.size(); i++) {
@@ -250,37 +254,9 @@ void AdjacencyList::getDestinations(string location,string sort)
     }
     cout << "\nBased on the price comparison between Uber and Lyft, we recommend you take " << type;
     cout << " to " << destination;
-    cout << " for about $" << min << ". Have fun!!! Be safe!!\n";
+    cout << " for about " << min << "$. Have fun!!! Be safe!!\n";
+
 }//end heap destinations
-
-void AdjacencyList::getTime(string location)
-{
-    //comparing times of heap sort vs bubble sort
-    vector<pair<string, float> > destinationsUber = uber[location];
-    vector<pair<string, float> > destinationsLyft = lyft[location];
-
-    //time for heap sort, Uber
-    auto superStart = chrono::high_resolution_clock::now();
-    superSort(destinationsUber);
-    superSort(destinationsLyft);
-    auto superStop = chrono::high_resolution_clock::now();
-    auto superTime = chrono::duration_cast<chrono::nanoseconds>(superStop-superStart).count();
-
-    auto bubbleStart = chrono::high_resolution_clock::now();
-    bubbleSort(destinationsUber);
-    bubbleSort(destinationsLyft);
-    auto bubbleStop = chrono::high_resolution_clock::now();
-    auto bubbleTime = chrono::duration_cast<chrono::nanoseconds>(bubbleStop-bubbleStart).count();
-
-    cout << "\nTime taken for heap sort: " << superTime << " nanoseconds\n";
-    cout << "Time taken for bubble sort: " << bubbleTime << " nanoseconds\n";
-}
-
-void AdjacencyList::seeAllDestinations() {
-    for(auto i = vertices.begin(); i != vertices.end(); i++) {
-        cout << *i << endl;
-    }
-}
 
 int main()
 {
@@ -313,8 +289,8 @@ int main()
             getline(linestream, extra, ',');
 
             if (p == "") //there's some that have the price field blank
-                continue; //@ CHANCE REVIEW. IF THE PRICE IS 0 IT FUCKS W OUR COMPARISONS SO I JUST THINK
-            //WE SHOULDNT ADD TO MAP. DOES CONTINUE BRING BACK TO WHILE LOOP?
+                continue;
+
             price = stof(p);
 
             if (type == "Lyft")
@@ -342,7 +318,7 @@ int main()
         string yn;
         getline(cin,yn);
         if (yn == "yes") //print out list of locations in database
-            graph.seeAllDestinations();
+            graph.printLocations();
         cout << "\nTry entering a new place: ";
         getline(cin,location);
     }
