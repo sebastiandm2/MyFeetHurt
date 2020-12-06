@@ -27,13 +27,14 @@ public:
     void printLyft(); //checking if everything is loaded properly
     void printUber(); //checking if everything is loaded properly
     bool averagePrice(string to, string from, int price, string type);
+    void seeAllDestinations();
 
     //our sorting methods
     void heapSort(vector<pair<string, float> >& v);
     void heapify(vector<pair<string, float> >& v, int n, int start);
     void buildHeap(vector<pair<string, float> >& v, int size);
     void superSort(vector<pair<string, float> >& v);
-    vector<pair<string, float>> bubbleSort(vector<pair<string, float>>& v);
+    vector<pair<string, float> > bubbleSort(vector<pair<string, float> >& v);
 
     //calling our sorting methods
     void getDestinations(string location, string sort);
@@ -45,7 +46,7 @@ public:
 
 bool AdjacencyList::averagePrice(string to, string from, int price, string type) {
     //if the location is already there average the price, otherwise return false
-    vector<pair <string, float>> val;
+    vector<pair <string, float> > val;
     bool dne=true;
     if (type == "uber")
         val=uber[from];
@@ -69,6 +70,8 @@ void AdjacencyList::insertLyft(string from, string to, float price) //populate m
     {
         lyft[from].push_back(make_pair(to, price));
         lyft[to].push_back(make_pair(from, price));
+        vertices.insert(from);
+        vertices.insert(to);
     }
     //lyft[from].push_back(make_pair(to, price));
     //lyft[to].push_back(make_pair(from, price));
@@ -81,6 +84,8 @@ void AdjacencyList::insertUber(string from, string to, float price) //populate m
     {
         uber[from].push_back(make_pair(to, price));
         uber[to].push_back(make_pair(from, price));
+        vertices.insert(from);
+        vertices.insert(to);
     }
     //uber[from].push_back(make_pair(to, price));
     //uber[to].push_back(make_pair(from, price));
@@ -177,7 +182,7 @@ void AdjacencyList::superSort(vector<pair<string, float> >& v) {
 }
 
 //algorithm 2 = bubble sort --> quadratic sort
-vector<pair<string, float>> AdjacencyList:: bubbleSort(vector<pair<string, float>>& v) {
+vector<pair<string, float> > AdjacencyList:: bubbleSort(vector<pair<string, float> >& v) {
     for(int i = v.size()-1; i > 0; i++) {
         bool swap = false;
         for(int j = 0; j < i; j++) {
@@ -271,6 +276,12 @@ void AdjacencyList::getTime(string location)
     cout << "Time taken for bubble sort: " << bubbleTime << " nanoseconds\n";
 }
 
+void AdjacencyList::seeAllDestinations() {
+    for(auto i = vertices.begin(); i != vertices.end(); i++) {
+        cout << *i << endl;
+    }
+}
+
 int main()
 {
     //READ IN FILE DATA AND POPULATE MAPS
@@ -331,7 +342,7 @@ int main()
         string yn;
         getline(cin,yn);
         if (yn == "yes") //print out list of locations in database
-            graph.printLocations();
+            graph.seeAllDestinations();
         cout << "\nTry entering a new place: ";
         getline(cin,location);
     }
