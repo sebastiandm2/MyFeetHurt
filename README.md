@@ -1,5 +1,4 @@
 # MyFeetHurt
-ya boi's feet do be hurtin
 
 Step 1: Set up the git hub
 Step 2: Read in the data from excel and populate 2 maps. 1 for lyft information, 1 for uber information.
