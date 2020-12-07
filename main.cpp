@@ -148,17 +148,17 @@ void AdjacencyList::heapify(vector<pair<string, float> >& v, int n, int start)
     int left = 2*start + 1;
     int right = 2*start + 2;
 
-    if (left < n && v[left].second > v[big].second) {
+    if (left < n && v[left].second > v[big].second) { //find biggest element in vector
         big = left;
     }
 
-    if (right < n && v[right].second > v[big].second) {
+    if (right < n && v[right].second > v[big].second) { //find biggest
         big = right;
     }
 
-    if (big != start) {
+    if (big != start) { //swap biggest
         swap(v[start], v[big]);
-        heapify(v, n, big);
+        heapify(v, n, big); //recursion
     }
 }
 void AdjacencyList::buildHeap(vector<pair<string, float> >& v, int size) {
@@ -177,16 +177,16 @@ void AdjacencyList::heapSort(vector<pair<string, float> >& v)
 }
 void AdjacencyList::superSort(vector<pair<string, float> >& v) {
     bool sorted = true;
-    for(int i = 0; i < v.size()-1; i++) {
+    for(int i = 0; i < v.size()-1; i++) { //check if vector is already sorted => best case
         if(v[i] > v[i+1]) {
             sorted = false;
         }
     }
     if(sorted) {
-        cout << "sorted!" << endl;
         return;
     }
-    heapSort(v);
+    
+    heapSort(v); //heap sort otherwise
 }
 
 //algorithm 2 = bubble sort --> quadratic sort
