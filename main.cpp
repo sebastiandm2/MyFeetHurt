@@ -162,15 +162,15 @@ void AdjacencyList::heapify(vector<pair<string, float> >& v, int n, int start)
     }
 }
 void AdjacencyList::buildHeap(vector<pair<string, float> >& v, int size) {
-    for (int i = size / 2 - 1; i >= 0; i--) {
+    for (int i = size / 2 - 1; i >= 0; i--) { //build heap
         heapify(v, size, i);
     }
 }
 void AdjacencyList::heapSort(vector<pair<string, float> >& v)
 {
     int size = v.size();
-    buildHeap(v, size);
-    for (int i = size - 1; i > 0; i--) {
+    buildHeap(v, size); //builds a heap
+    for (int i = size - 1; i > 0; i--) { //remove 1 element at a time
         swap(v[0], v[i]);
         heapify(v, i, 0);
     }
